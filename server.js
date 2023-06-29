@@ -45,7 +45,6 @@ db.getConnection((err, connection) => {
 app.use(cors());
 app.use(express.json());
 
-
 app.post('/login', (req, res) => {
   const { usuario, senha } = req.body;
 
@@ -134,7 +133,6 @@ app.use((req, res, next) => {
 
   next();
 });
-const token = jwt.sign({ id: user.id, role: user.acesso }, 'suus02201998##', { expiresIn: '1h' });
 
 
 
@@ -161,25 +159,22 @@ mercadopago.configure({
 });
 
 app.post('/create_preference', async (req, res) => {
-  const { title, price, quantity } = req.body;
+  const items = req.body.items.map(item => ({
+    title: item.title,
+    unit_price: Number(item.unit_price),
+    quantity: Number(item.quantity),
+  }));
 
-  const preference = {
-    items: [
-      {
-        title,
-        unit_price: Number(price),
-        quantity: Number(quantity),
-      },
-    ],
-  };
+  const preference = { items };
 
   try {
-    const response = await mercadopago.preferences.create(preference); // Correção aqui
+    const response = await mercadopago.preferences.create(preference);
     res.json({ id: response.body.id });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 app.post('/webhook', async (req, res) => {
   console.log("Received a webhook event", req.body);  
