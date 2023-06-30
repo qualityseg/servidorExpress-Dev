@@ -159,22 +159,25 @@ mercadopago.configure({
 });
 
 app.post('/create_preference', async (req, res) => {
-  const items = req.body.items.map(item => ({
-    title: item.title,
-    unit_price: Number(item.unit_price),
-    quantity: Number(item.quantity),
-  }));
+  const { title, price, quantity } = req.body;
 
-  const preference = { items };
+  const preference = {
+    items: [
+      {
+        title,
+        unit_price: Number(price),
+        quantity: Number(quantity),
+      },
+    ],
+  };
 
   try {
-    const response = await mercadopago.preferences.create(preference);
+    const response = await mercadopago.preferences.create(preference); // Correção aqui
     res.json({ id: response.body.id });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 app.post('/webhook', async (req, res) => {
   console.log("Received a webhook event", req.body);  
